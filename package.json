@@ -2,7 +2,7 @@
   "name": "serverless-navigator",
   "displayName": "Serverless Navigator",
   "description": "Navigate from serverless.yml handler and schema definitions directly to source files and JSON schemas with clickable links and CodeLens.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "andreluizbatista",
   "license": "MIT",
   "icon": "icon.png",
