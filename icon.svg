@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <rect width="256" height="256" rx="24" fill="#1A1A2E"/>
+  <!-- Serverless lightning bolt -->
+  <path d="M148 32L68 144h52L96 224l108-128h-60L148 32z" fill="#FD5750"/>
+  <!-- Navigation arrow accent -->
+  <path d="M148 32L68 144h52" fill="#FD5750" opacity="0.9"/>
+  <path d="M96 224l108-128h-60" fill="#E8453E" opacity="0.85"/>
+  <!-- Subtle inner highlight -->
+  <path d="M148 32L68 144h52L96 224l108-128h-60L148 32z" fill="url(#grad)" opacity="0.3"/>
+  <defs>
+    <linearGradient id="grad" x1="128" y1="32" x2="128" y2="224" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+</svg>
