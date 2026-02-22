@@ -1,0 +1,28 @@
+{
+  "name": "serverless-navigator",
+  "displayName": "Serverless Navigator",
+  "description": "Navigate from serverless.yml handler and schema definitions directly to source files and JSON schemas with clickable links and CodeLens.",
+  "version": "0.1.0",
+  "publisher": "inhire",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andreluizweb/serverless-navigator"
+  },
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onLanguage:yaml"],
+  "main": "./out/extension.js",
+  "contributes": {},
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "npx tsx test/test.ts",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0",
+    "@types/node": "^20.0.0"
+  }
+}
