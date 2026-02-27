@@ -1,6 +1,8 @@
 src/**
+!src/assets/**
 node_modules/**
 .vscode/**
+.claude/**
 tsconfig.json
 **/*.map
 **/*.ts
