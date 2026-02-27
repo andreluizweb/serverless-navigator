@@ -266,6 +266,35 @@ functions:
   assert(result.schemas.length === 0, `Expected 0 schemas for non-file ref, got ${result.schemas.length}`);
 });
 
+// Test 14
+runTest('testFunctionLineTracking', () => {
+  const yaml = `
+service: my-service
+
+functions:
+  createBook:
+    handler: src/handlers/book.createBook
+    events:
+      - http: POST /books
+  deleteBook:
+    handler: src/handlers/book.deleteBook
+    events:
+      - http: DELETE /books
+`;
+  const result = parseServerlessYaml(yaml);
+  assert(result.handlers.length === 2, `Expected 2 handlers, got ${result.handlers.length}`);
+
+  // createBook: is on line 4 (0-indexed), handler: is on line 5
+  assert(result.handlers[0].functionName === 'createBook', `Wrong functionName: ${result.handlers[0].functionName}`);
+  assert(result.handlers[0].functionLine === 4, `Expected functionLine 4, got ${result.handlers[0].functionLine}`);
+  assert(result.handlers[0].line === 5, `Expected handler line 5, got ${result.handlers[0].line}`);
+
+  // deleteBook: is on line 8 (0-indexed), handler: is on line 9
+  assert(result.handlers[1].functionName === 'deleteBook', `Wrong functionName: ${result.handlers[1].functionName}`);
+  assert(result.handlers[1].functionLine === 8, `Expected functionLine 8, got ${result.handlers[1].functionLine}`);
+  assert(result.handlers[1].line === 9, `Expected handler line 9, got ${result.handlers[1].line}`);
+});
+
 console.log(`\nResults: ${passed} passed, ${failed} failed\n`);
 
 if (failed > 0) {

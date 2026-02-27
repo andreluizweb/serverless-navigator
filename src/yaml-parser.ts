@@ -1,6 +1,7 @@
 export interface HandlerEntry {
   raw: string;
   line: number;
+  functionLine: number;
   valueStart: number;
   functionName: string;
 }
@@ -38,6 +39,7 @@ function extractHandlers(lines: string[]): HandlerEntry[] {
   let functionsIndent = -1;
   let currentFunctionName = '';
   let currentFunctionIndent = -1;
+  let currentFunctionLine = -1;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -59,6 +61,7 @@ function extractHandlers(lines: string[]): HandlerEntry[] {
       inFunctions = false;
       currentFunctionName = '';
       currentFunctionIndent = -1;
+      currentFunctionLine = -1;
       continue;
     }
 
@@ -80,6 +83,7 @@ function extractHandlers(lines: string[]): HandlerEntry[] {
         if (!isChildOfFunction) {
           currentFunctionName = key;
           currentFunctionIndent = indent;
+          currentFunctionLine = i;
         }
       }
     }
@@ -91,6 +95,7 @@ function extractHandlers(lines: string[]): HandlerEntry[] {
         handlers.push({
           raw: rawValue,
           line: i,
+          functionLine: currentFunctionLine,
           valueStart,
           functionName: currentFunctionName,
         });
