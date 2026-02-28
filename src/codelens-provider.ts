@@ -1,8 +1,12 @@
-import * as vscode from 'vscode';
-import * as path from 'path';
-import { parseServerlessYaml } from './yaml-parser';
-import { resolveVariables } from './variable-resolver';
-import { resolveHandler, findExportPosition, getWorkspaceRoot } from './file-resolver';
+import * as vscode from "vscode";
+import * as path from "path";
+import { parseServerlessYaml } from "./yaml-parser";
+import { resolveVariables } from "./variable-resolver";
+import {
+  resolveHandler,
+  findExportPosition,
+  getWorkspaceRoot,
+} from "./file-resolver";
 
 export class ServerlessCodeLensProvider implements vscode.CodeLensProvider {
   private _onDidChangeCodeLenses = new vscode.EventEmitter<void>();
@@ -16,7 +20,7 @@ export class ServerlessCodeLensProvider implements vscode.CodeLensProvider {
     document: vscode.TextDocument,
   ): Promise<vscode.CodeLens[]> {
     const basename = path.basename(document.uri.fsPath);
-    if (basename !== 'serverless.yml' && basename !== 'serverless.yaml') {
+    if (basename !== "serverless.yml" && basename !== "serverless.yaml") {
       return [];
     }
 
@@ -42,25 +46,36 @@ export class ServerlessCodeLensProvider implements vscode.CodeLensProvider {
       lenses.push(
         new vscode.CodeLens(range, {
           title: `$(file-code) ${resolved.relativePath}`,
-          command: 'serverless-navigator.openHandler',
+          command: "serverless-navigator.openHandler",
           arguments: [resolved.filePath, resolved.exportName],
         }),
       );
 
-      const exportPos = await findExportPosition(resolved.filePath, resolved.exportName);
+      const exportPos = await findExportPosition(
+        resolved.filePath,
+        resolved.exportName,
+      );
       if (exportPos) {
         lenses.push(
           new vscode.CodeLens(range, {
             title: `$(symbol-function) ${resolved.exportName}`,
-            command: 'serverless-navigator.goToExport',
+            command: "serverless-navigator.goToExport",
             arguments: [resolved.filePath, exportPos],
           }),
         );
       }
+
+      lenses.push(
+        new vscode.CodeLens(range, {
+          title: "$(cloud) CloudWatch LogInsights",
+          command: "serverless-navigator.openCloudWatchLogs",
+          arguments: [handler.functionName, parsed.data],
+        }),
+      );
     }
 
     const serverlessDir = path.dirname(document.uri.fsPath);
-    const fs = await import('fs');
+    const fs = await import("fs");
 
     for (const schema of parsed.schemas) {
       const absolutePath = path.resolve(serverlessDir, schema.filePath);
@@ -73,7 +88,7 @@ export class ServerlessCodeLensProvider implements vscode.CodeLensProvider {
       lenses.push(
         new vscode.CodeLens(range, {
           title: `$(json) ${schema.filePath}`,
-          command: 'serverless-navigator.openSchema',
+          command: "serverless-navigator.openSchema",
           arguments: [absolutePath],
         }),
       );

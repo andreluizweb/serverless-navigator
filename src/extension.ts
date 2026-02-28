@@ -92,6 +92,86 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
   );
 
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      'serverless-navigator.openCloudWatchLogs',
+      async (functionName: string, data: Record<string, unknown>) => {
+        const service = String(data.service || '');
+        const provider = (data.provider || {}) as Record<string, unknown>;
+        const region = String(provider.region || 'us-east-1');
+
+        if (!service) {
+          vscode.window.showErrorMessage('Could not determine service name from serverless.yml');
+          return;
+        }
+
+        const config = vscode.workspace.getConfiguration('serverlessNavigator');
+        const stages = config.get<string[]>('stages', []);
+        const defaultStage = config.get<string>('defaultStage', '');
+
+        let stage: string | undefined;
+        const newStageLabel = '$(add) New stage...';
+
+        if (stages.length > 0) {
+          const items = [...stages, newStageLabel];
+          const picked = await vscode.window.showQuickPick(items, {
+            placeHolder: defaultStage || 'Select a stage',
+            title: 'CloudWatch Logs - Select Stage',
+          });
+          if (picked === undefined) {
+            return;
+          }
+          if (picked === newStageLabel) {
+            stage = await vscode.window.showInputBox({
+              prompt: 'Enter a new stage name',
+              placeHolder: 'e.g. dev, staging, prod',
+            });
+            if (stage === undefined || stage.trim() === '') {
+              return;
+            }
+            stage = stage.trim();
+            if (!stages.includes(stage)) {
+              await config.update('stages', [...stages, stage], vscode.ConfigurationTarget.Workspace);
+            }
+          } else {
+            stage = picked;
+          }
+        } else {
+          stage = await vscode.window.showInputBox({
+            prompt: 'Enter the stage name',
+            placeHolder: 'e.g. dev, staging, prod',
+            value: defaultStage,
+          });
+          if (stage === undefined || stage.trim() === '') {
+            return;
+          }
+          stage = stage.trim();
+          await config.update('stages', [stage], vscode.ConfigurationTarget.Workspace);
+        }
+
+        const functions = (data.functions || {}) as Record<string, Record<string, unknown>>;
+        const fnConfig = functions[functionName] || {};
+        let lambdaName: string;
+
+        if (fnConfig.name) {
+          lambdaName = String(fnConfig.name)
+            .replace(/\$\{self:service}/g, service)
+            .replace(/\$\{self:provider\.stage}/g, stage)
+            .replace(/\$\{opt:stage}/g, stage)
+            .replace(/\$\{sls:stage}/g, stage);
+        } else {
+          lambdaName = `${service}-${stage}-${functionName}`;
+        }
+
+        const logGroup = `/aws/lambda/${lambdaName}`;
+        const encodedLogGroup = logGroup.replace(/\//g, '*2f');
+        const url = `https://${region}.console.aws.amazon.com/cloudwatch/home?region=${region}#logsV2:logs-insights$3FqueryDetail$3D~(source~(~'${encodedLogGroup}))`;
+
+        vscode.env.openExternal(vscode.Uri.parse(url));
+      },
+    ),
+  );
+
   const watcher = vscode.workspace.createFileSystemWatcher(
     '**/*.{ts,js,mjs,cjs,yml,yaml,json}',
   );
