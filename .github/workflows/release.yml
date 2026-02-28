@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check version bump
+        id: version
+        run: |
+          CURRENT=$(node -p "require('./package.json').version")
+          PREVIOUS=$(git show HEAD~1:package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+          if [ "$CURRENT" = "$PREVIOUS" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.version.outputs.changed == 'true'
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.version.outputs.changed == 'true'
+        run: npm install
+
+      - name: Compile
+        if: steps.version.outputs.changed == 'true'
+        run: npm run compile
+
+      - name: Test
+        if: steps.version.outputs.changed == 'true'
+        run: npm test
+
+      - name: Package extension
+        if: steps.version.outputs.changed == 'true'
+        run: npx @vscode/vsce package -o build/
+
+      - name: Publish to VS Code Marketplace
+        if: steps.version.outputs.changed == 'true'
+        run: npx @vscode/vsce publish
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      - name: Publish to Open VSX
+        if: steps.version.outputs.changed == 'true'
+        run: npx ovsx publish build/*.vsix
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+
+      - name: Create tag and GitHub Release
+        if: steps.version.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="v${{ steps.version.outputs.current }}"
+          git tag "$VERSION"
+          git push origin "$VERSION"
+          gh release create "$VERSION" build/*.vsix --title "$VERSION" --generate-notes
