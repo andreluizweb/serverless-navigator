@@ -2,7 +2,7 @@
   "name": "serverless-navigator",
   "displayName": "Serverless Navigator",
   "description": "Navigate from serverless.yml handler and schema definitions directly to source files and JSON schemas with clickable links and CodeLens.",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "publisher": "andreluizbatista",
   "license": "MIT",
   "icon": "src/assets/icon.png",
@@ -28,7 +28,9 @@
       "properties": {
         "serverlessNavigator.stages": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": [],
           "description": "List of available stages for CloudWatch Logs (e.g. [\"dev\", \"staging\", \"prod\"]). If empty, a free-text input will be shown."
         },
