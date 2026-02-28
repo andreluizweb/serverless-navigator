@@ -9,6 +9,7 @@ interface ReverseEntry {
   functionName: string;
   functionLine: number;
   exportName: string;
+  parsedData: Record<string, unknown>;
 }
 
 export class ReverseCodeLensProvider implements vscode.CodeLensProvider {
@@ -55,6 +56,14 @@ export class ReverseCodeLensProvider implements vscode.CodeLensProvider {
           arguments: [entry.serverlessPath, entry.functionLine],
         }),
       );
+
+      lenses.push(
+        new vscode.CodeLens(range, {
+          title: '$(cloud) CloudWatch LogInsights',
+          command: 'serverless-navigator.openCloudWatchLogs',
+          arguments: [entry.functionName, entry.parsedData],
+        }),
+      );
     }
 
     return lenses;
@@ -97,6 +106,7 @@ export class ReverseCodeLensProvider implements vscode.CodeLensProvider {
           functionName: handler.functionName,
           functionLine: handler.functionLine,
           exportName: resolved.exportName,
+          parsedData: parsed.data,
         });
         this.cache.set(absPath, existing);
       }
