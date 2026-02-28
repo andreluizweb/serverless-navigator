@@ -48,7 +48,9 @@ jobs:
 
       - name: Package extension
         if: steps.version.outputs.changed == 'true'
-        run: npx @vscode/vsce package -o build/
+        run: |
+          mkdir -p build
+          npx @vscode/vsce package -o build/
 
       - name: Publish to VS Code Marketplace
         if: steps.version.outputs.changed == 'true'
