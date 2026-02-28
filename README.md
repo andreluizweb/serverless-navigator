@@ -2,6 +2,8 @@
 
 VS Code extension that adds smart navigation to `serverless.yml` files. Handler values become clickable links that open the referenced source file and jump straight to the exported function. Schema references using `${file(...)}` also become navigable links to the JSON schema file.
 
+![Demo](src/assets/demo.gif)
+
 ## Features
 
 - **Clickable links** on `handler:` values — jump to the file and exported function
